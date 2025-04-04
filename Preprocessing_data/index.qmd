@@ -1,0 +1,203 @@
+---
+title: "Preprocessing GEO transcriptomic data"
+author: "Luciano Anselmino"
+format: 
+  html:
+    toc: true
+    css: styles.css
+    code-fold: true
+    self-contained: true
+    theme: flatly 
+editor: visual
+---
+
+### About expression values
+
+::: {style="text-align: justify;"}
+Gene expression matrices downloaded from GEO can vary in their preprocessing status. The values you download are not always the ones directly obtained from the measurement technologies, such as raw luminescence values or raw counts (known as raw data) . Often, data is uploaded to databases with prior preprocessing done by the authors who provide them. You can usually find the following formats:
+
+-   **Raw data**: These are the original data directly obtained from experiments, such as microarray signal intensities or sequencing counts. These data often require additional preprocessing and normalization steps before being used in comparative analyses.
+
+-   **Normalized data**: In some cases, the data on GEO have already been normalized using specific methods (such as RMA for microarrays or TPM for RNA-seq). However, this depends on how the data were uploaded by the researchers. In microarrays, normalization is mainly performed to correct technical variations in fluorescence intensities between probes and samples. This includes steps such as background correction and signal distribution equalization using techniques like RMA or MAS5, resulting in a single value per gene after probe summarization (a process of combining multiple probes or RNA reads from different regions of the same gene into a single expression value, typically using the mean or median). In RNA-seq, probes are not involved, as reads aligning to each genomic region are counted directly. Here, normalization focuses on adjusting for differences in sequencing depth and gene length, using metrics like TPM, FPKM, or RPKM to reflect the relative abundance.
+
+Checking the metadata will help you identify if the data has already been normalized or if you will need to perform this step manually before conducting any analyses. You can explore the 'data_processing' column from the metadata. Let´s see an example:
+:::
+
+``` r
+gse1 <- getGEO("GSE39582", GSEMatrix = TRUE) # Here, I randomly called the data from the GSE39582 series 'gse1'
+gse1_data <- gse1[[1]] 
+metadata1 <- pData(gse1_data)
+metadata1$data_processing
+```
+
+```         
+Output:  [1] "RMA normalisation (Bioconductor R affy package) + ComBat (R sva package )"    
+[2] "RMA normalisation (Bioconductor R affy package) + ComBat (R sva package )"     
+[3] "RMA normalisation (Bioconductor R affy package) + ComBat (R sva package )"     
+[4] "RMA normalisation (Bioconductor R affy package) + ComBat (R sva package )"  
+...  
+[585] "RMA normalisation (Bioconductor R affy package) + ComBat (R sva package )"
+```
+
+::: {style="text-align: justify;"}
+Here we can see that the expression values in the gene expression matrix we downloaded are not raw counts but have already been normalized using RMA. Additionally, a technique called ComBat was used to merge matrices from different studies, removing non-biological variability.
+
+Also if you go to the GEO webpage and search for the code of the data series you are interested in, you can access the list of individual samples within the series. If you click on a sample and scroll down to the end of the page, you will find a section of the expression matrix for that specific sample. There, the 'VALUE' field indicates whether the expression value corresponds to any preprocessing or normalization method. Here is an [example](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM2165276)—scroll to the end of the page.
+:::
+
+### Filtering samples
+
+::: {style="text-align: justify;"}
+If you're not interested in all the samples within a GEO series, you can create a list by filtering the samples directly from the metadata to retain only the patients you're interested in. You can explore the column names of the metadata to identify the fields that could be important for you analysis.
+
+For example, in the analysis of this [article](https://www.mdpi.com/2073-4409/13/21/1776), I was specifically interested in patients treated with 5-FU, so I performed a search in GEO and chose the series GSE39582. I explored the metadata column names of GSE39582 using the colnames command. I identified a column called "chemotherapy.adjuvant.type:ch1", which contains information about the patients' treatments. Using this column, I filtered only the samples of patients treated with 5-FU.
+
+Let's see this with code:
+:::
+
+``` r
+table(metadata1$`chemotherapy.adjuvant.type:ch1`)# To obtain a summary of the information in a column, you can use the 'table' command.
+```
+
+<div>
+
+Output:
+
+```         
+ 5FU FOLFIRI  FOLFOX   FUFOL     N/A   other       
+ 82      12      23      54     411       3 
+```
+
+Here, we see that we can use 82 samples from patients treated with 5-FU to perform the analysis. Let's filter these:
+
+</div>
+
+``` r
+
+# Filter the patients of interest
+filtered_patients <- metadata1[metadata1$`chemotherapy.adjuvant.type:ch1` == '5FU', ] # Here is important that you conntrol how is writen the name of the treatrment, for example, in this case '5-FU" is written as "5FU" (without hyphen)
+
+# Get the sample names that meet the criteria
+sample_ids <- rownames(filtered_patients) #Here, I used 'rownames' because in the metadata, samples (or patients) are in the rows instead of the columns-
+
+# Filter the gene expression data for the samples of interest
+filtered_expression_data <- exprs(gse1_data)[, sample_ids]
+```
+
+Now, `filtered_expression_data` is a `data.frame` that contains only 82 columns, which correspond to the 82 patients treated with 5-FU and 54675 probes.
+
+### Exploring the data
+
+::: {style="text-align: justify;"}
+Regardless of the technology used to obtain the gene expression values, before starting any type of analysis, it is advisable to perform an exploratory boxplot. If the data you downloaded is in raw format, you should expect to see misaligned boxplots across the samples. However, if the data is normalized and the normalization was successful, all the boxes in the boxplot should be approximately at the same level (same median and similar interquartile range). This indicates that the variation among the samples has been standardized.
+
+Remember that boxplots are used to show the distribution of gene expression values for each sample before and after normalization. The purpose of creating this plot is to verify whether the samples are comparable to each other, which is crucial to avoid biases in subsequent analyses.
+
+Other aspects to observe in your boxplot to verify successful normalization are the outliers, as points outside the 'boxes' represent atypical values. An excessive number of outliers or significant dispersion among the samples may suggest that the normalization was inadequate.
+
+You should also observe the height of the boxes. The boxes (interquartile range) show the dispersion of the values; significant differences in the height of the boxes between samples could indicate issues with the normalization.
+:::
+
+``` r
+# Following the example from the publication:
+par(mar = c(7, 4, 4, 2))     #Adjust the sheet margins (useful when the axis labels are long).
+boxplot(
+  filtered_expression_data,  # Data to plot (filtered expression data)
+  col = rainbow(82),         # Color the boxes with a rainbow palette of 82 colors
+  las = 2,                   # Rotate axis labels to 90 degrees
+  ylab = "Luminescence",     # Label the y-axis as "Luminescence"
+  xlab = "",                 # No label for the x-axis
+  cex.axis = 0.7,            # Set the axis label size to 70% of default
+  outcex = 0.35,             # Size of outlier points (smaller than default)
+  outcol = "red"             # Color outlier points in red
+)
+
+# Add a label "SampleID" to the x-axis, with a specific position (line 5)
+mtext("SampleID", side = 1, line = 5)
+```
+
+![](Images/boxplot.png)
+
+``` r
+## If you want to save the image directly on your computer (in pdf format), you can try:
+pdf(file="GSE81653_boxplot.pdf", pointsize=8, width=10, height=5)
+par(mar = c(7, 4, 4, 2))
+boxplot(
+        filtered_expression_data, 
+        col = rainbow(82), 
+        las = 2,
+        ylab = "Luminescence", 
+        xlab = "",
+        cex.axis = 0.7, 
+        outcex = 0.35, 
+        outcol = "red"
+)
+mtext("SampleID", side = 1, line = 5)
+dev.off()
+```
+
+::: {style="text-align: justify;"}
+In the graph, we can see that there are many outliers in the upper part of the distribution. You may frequently encounter this when analyzing microarray data. Before exploring other potential technical or biological reasons, the most convenient approach is to filter out the probes that have low luminescence, meaning probes whose luminescence is very similar to the background luminescence of the chip. Often, if there are many of these probes, they tend to "pull down" the luminescence values, causing outliers that are actually informative. Let’s see how to do this:
+:::
+
+``` r
+#Visualization and selection to intensity cut-off
+#Affy
+median_expresion <- rowMedians(Biobase::exprs(cnedata))
+name = "5fu hist_res normalized.pdf"
+pdf(file=name,pointsize=10,width=10, heigh=10)
+hist(median_expresion, 100, col = "cornsilk1", freq = FALSE, 
+            main = "Histogram of the median intensities", 
+            border = "antiquewhite4",
+            xlab = "Median intensities")
+dev.off()
+
+#Oligo
+median_expresion <- rowMedians(Biobase::exprs(ndata))
+name = "5fu hist_res normalized3.pdf"
+pdf(file=name,pointsize=10,width=10, heigh=10)
+oligo::hist(median_expresion,100, col = "cornsilk1", freq = FALSE, 
+            main = "Histogram of the median intensities", 
+            border = "antiquewhite4",
+            xlab = "Median intensities")
+dev.off()
+
+samples_cutoff<-14
+man_threshold<-8
+idx_man_threshold <- apply(Biobase::exprs(cnedata), 1,
+                           function(x){
+                          sum(x > man_threshold) >= samples_cutoff})
+                          table(idx_man_threshold)
+
+ifdata <- subset(cnedata, idx_man_threshold)
+```
+
+### What should I do if my data is not normalized?
+
+::: {style="text-align: justify;"}
+To normalize gene expression data measured by microarrays in R, there are several commonly used methods depending on the data type and experimental design:
+
+1.  **RMA (Robust Multi-array Average)**: his method is one of the most popular for normalizing Affymetrix microarray data. It includes background correction, quantile normalization, and expression summarization.
+
+    **R Package**: `affy` or `oligo` (for Affymetrix data). Keep in mind that the affy package is designed to normalize data from older microarrays, such as the HG-U133 series. In contrast, the oligo package allows for the normalization of data from newer generation Affymetrix chips and other platforms like NimbleGen and Exon arrays.
+
+2.  **Quantile Normalization**: Adjusts the distribution of expression values across samples to have the same distribution, which helps reduce technical variability.
+
+    -   **R Package**: `preprocessCore`.
+
+3.  **Loess Normalization**: Mainly used for normalizing two-color microarray data, adjusts the intensity of each sample to correct intensity-dependent effects.
+
+    -   **R Package**: `limma`.
+
+4.  **VSN (Variance Stabilizing Normalization)**: This method transforms the data to stabilize the variance as a function of the mean, minimizing intensity-dependent effects.
+
+    -   **R Package**: `vsn`.
+
+5.  **MAS5 Normalization**: An older method but still used in some analyses of Affymetrix data.
+
+    -   **R Package**: `affy`.
+
+Among the options mentioned, the RMA method has been the most widely used in the scientific community due to its flexibility and advanced preprocessing options. Keep in mind that normalization using the oligo package can be more demanding in terms of computational resources, which is an important factor to consider when working with large volumes of data.
+
+To load your samples into the working environment, you need to download them in .CEL format to a folder set as your working directory. Often, samples are downloaded in compressed files along with their metadata. If that's the case, you need to unzip them and place the .CEL files in a separate folder, as having other types of files in the folder read by the affy function can cause errors during loading.
+:::

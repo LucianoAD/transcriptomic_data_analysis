@@ -1,0 +1,166 @@
+---
+title: "Search and Download of transcriptomic data from the GEO database"
+author: "Luciano Anselmino"
+format: 
+  html:
+    toc: true
+    css: styles.css
+    code-fold: true
+    self-contained: true
+    theme: flatly 
+editor: visual
+---
+
+### Where to search human data gene expression?
+
+::: {style="text-align: justify;"}
+For searching human gene expression data, you can explore several major public databases and repositories that host a wide range of gene expression datasets. Here are some key resources:
+
+-   [Gene Expression Omnibus - NCBI](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.ncbi.nlm.nih.gov/geo/&ved=2ahUKEwj6vN7Bwo6IAxVtr5UCHVvLA7EQFnoECBUQAQ&usg=AOvVaw3Dc0qZ8-sNL7LwyPCWsoAr): A comprehensive public repository for gene expression data, including both raw and processed data
+-   [ArrayExpress \< BioStudies \< EMBL-EBI](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.ebi.ac.uk/arrayexpress/&ved=2ahUKEwid2ueawo6IAxWDrJUCHRBALsEQFnoECAoQAQ&usg=AOvVaw3VcwRVp5LM1TknDQJGWilt): A database of functional genomics experiments, including gene expression data from various platforms.
+-   [The Cancer Genome Atlas Program (TCGA) - NCI](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.cancer.gov/ccg/research/genome-sequencing/tcga&ved=2ahUKEwi8kKrswY6IAxUWqJUCHUkfM4oQFnoECBkQAQ&usg=AOvVaw2DAuLgtHHkBJrTRkFONrpi): Provides data on gene expression and other genomics for various types of cancer.
+-   [Expression Project for Oncology (expO)](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.refine.bio/experiments/GSE2109/expression-project-for-oncology-expo&ved=2ahUKEwi-iZCbwY6IAxWZpJUCHTZFG-MQFnoECBgQAQ&usg=AOvVaw0iXOH6PLfWO6X0UOFzfY8e): collects gene expression data obtained from tumor samples, allowing researchers to explore how gene expression patterns change in the context of cancer. Includes gene expression data in different types of cancer, both in tumor conditions and in comparative normal samples.
+-   [cBioPortal for Cancer Genomics](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.cbioportal.org/&ved=2ahUKEwi54avO6ZOIAxVerZUCHYj4DJ4QFnoECAkQAQ&usg=AOvVaw099aWQoFJloiAjhgTScY7c): This platform brings together studies from various databases and allows you to download both sequencing and mutation and clinical data.
+:::
+
+In this workflow, we will focus on the GEO database, as the data selected for the study were specifically downloaded from there.
+
+### About GEO
+
+::: {style="text-align: justify;"}
+GEO (Gene Expression Omnibus) is a public repository for genomic data. Its primary purpose is to store and share data from gene expression experiments, where the activity of genes is analyzed under different conditions or cell types. GEO serves as a centralized source for researchers to share their data with the scientific community, allowing others to reuse this data in new analyses or comparative studies.
+
+GEO stores various types of biological data, including:
+
+1.  **Gene expression data**: Information about gene expression levels under different conditions, such as tissues, cell types, cell lines, or in response to specific treatments. This includes data from microarrays and RNA-seq.
+
+2.  **DNA and RNA sequencing data**: Results from sequencing experiments, including RNA-seq (transcriptomes), ChIP-seq (protein-DNA interactions), and ATAC-seq (chromatin accessibility).
+
+3.  **Genotyping and genetic variant data**: Information about genomic variations, such as single nucleotide polymorphisms (SNPs), structural variants, and mutations, obtained from GWAS studies or other approaches.
+
+4.  **Metadata**: Descriptions of samples, including biological characteristics (e.g., age, sex, or disease state), experimental conditions (treatments, exposure times), and protocols used.
+
+5.  **Epigenetic profiles**: Data related to epigenetic modifications, such as DNA methylation patterns or histone modifications.
+
+6.  **Molecular interaction data**: Information from experiments like RIP-seq or CLIP-seq that identify interactions between molecules, such as RNA-RNA or protein-RNA interactions.
+
+7.  **Raw count matrices**: Files containing raw data from sequencing or microarray experiments, allowing for customized analyses.
+
+8.  **Chromatin accessibility profiles**: Data from assays like DNase-seq or ATAC-seq, revealing accessible regions of the genome.
+:::
+
+Aca agregar como se guarda la informacion en GEO (PL GSE y GSM)
+
+### About GEOquery
+
+::: {style="text-align: justify;"}
+**GEOquery** is a package in the R programming language that facilitates downloading and manipulating datasets from the GEO database. It is used to access various types of genomic data, such as gene expression matrices, time series data, and study metadata, directly from R, without the need to manually download them from the GEO website.
+
+First, you need to install the package in R if you haven’t already. This can be done by running:
+:::
+
+``` r
+install.packages("BiocManager")
+BiocManager::install("GEOquery")
+```
+
+<div>
+
+Then, you need to load GEOquery in your R session
+
+</div>
+
+``` r
+library(GEOquery)
+```
+
+::: {style="style"}
+To download data from GEO, you need to know the dataset identifier (e.g., "GSEXXXX"). You can read about how GEO organizes its information \[here\] and also learn how to perform a data search in GEO \[here\]. Once you have chosen your dataset, you can use the `getGEO` function to fetch it.
+:::
+
+``` r
+gse <- getGEO("GSEXXXX", GSEMatrix = TRUE) #Here, GSEXXXX is your selected GEO series, for example, GSE39582
+```
+
+::: {style="text-align: justify;"}
+Where `GSEMatrix = TRUE` indicates that you want the expression data in matrix form, which is common in many analyses.
+:::
+
+### What do I download when I use the GEOQuery getGeo function?
+
+<div>
+
+Gene expression data in R is most often downloaded as a data structure called “ExpressionSet” which is an S4 type object. An S4 object is a way to organize and work with data in R. Think of it as a box that can hold different types of data and knows what to do with it based on how it is labeled (its “class”). Inside this box, you can have various components, such as expression data and metadata (clinical data, data about how the experiment was performed, etc.). The label (or “class”) of the box tells R what kind of data it is handling and what functions to use to work with it. To work with S4 objects, you can use generic functions and methods specific to those objects. Here are some examples:
+
+Data Access:
+
+**exprs():** with this method retrieves the gene expression matrix.\
+**pData():** this method retrieves information about each samples (metadata).\
+**fData():** this method retrieves information about the features (probes or reads) measured by the technology (chip or sequencer).\
+**experimentData():** this method provides general metadata about the experiment, such as drugs, doses, time points, gene silencing, etc.\
+**annotation():** information about the platform (name, model, etc.).
+
+Let's see this whit code:
+
+</div>
+
+``` r
+library(GEOquery)
+
+# Download data from GEO
+gse <- getGEO("GSEXXXX", GSEMatrix = TRUE) #Here, GSEXXXX is your selected GEO series, for example, GSE39582.
+
+# The GEOSerie information is saved in a list that always has one element, but this element is an ExpressionSet class object, which is associated with the methods. 
+gse_data <- gse[[1]] # If you try something like "gse_data <- gse[[2]]" you will obtain an error
+
+# Access the expression matrix
+expression_data <- exprs(gse_data)
+
+# Access the metadata
+metadata <- pData(gse_data)
+
+# Access the feature data
+feature_data <- fData(gse_data) # Usually, here you can find information about the probes, for example, the gene symbol associated with the probe, the ENTREZ_ID and the gene ontology.
+
+# Access the experiment general information 
+experiment_data <- fData(gse_data) # here, you can find information about, for example, the last date the dataset was modified or the email of the contact person for questions.
+
+# Access the plataform name
+plataform<-annotation(gse_data)
+```
+
+![](Images/expression_set.png){width="497"}
+
+In the image above, you can observe a schematic representation of how an object of the ExpressionSet type is structured.
+
+### How is the gene expression matrix organized?
+
+<div>
+
+The information in the expression matrix will depend on the technique used to obtain the gene expression values. The two most common technologies today are microarrays (chips) and RNA sequencing (RNA-seq or high-throughput platforms).
+
+When you execute 'expression_data \<- exprs(gse_data)', you save a matrix object with the name "expression_data".
+
+In the case of microarrays, this object has the following characteristics:
+
+-   Probes are in rows: a probe is a small DNA (or RNA) sequence designed to bind (hybridize) to a specific sequence of interest. Each gene is typically represented by multiple probes. If you want to know more about how microarrays work, I recommend this amazing video ([link](https://www.youtube.com/watch?v=NgRfc6atXQ8)). The important thing here is that the probe names in the rows are written with a chip-specific code.
+
+-   Samples are in columns: each column of the expression matrix represents a patient or a sample. The samples also have a specific code, whose structure depends on the researchers performing the analysis. In the case of the GEO database, the samples always begin with "GSM" followed by a number, for example, GSM972020. But keep in mind that if you plan to download gene expression data from other databases, the sample codes might be very different.
+
+-   The expression values are in the cells: for microarrays, the gene expression values represent the "luminescence" (light intensity) emitted by the hybridization between the RNA entering the chip's well and the specific probe it contains.
+
+</div>
+
+![](Images/expression_matrix.png)
+
+<div>
+
+In the case of RNA-seq, the object has little differences:
+
+-   Genes names or code are in rows (there are no probes because the technique relies on the direct sequencing of RNA fragments). Usually, you can find official gene name , ENTEREZ ID or ENSAMBLE IDs in rows.
+
+-   The columns continue to be the patients or samples.
+
+-   Values in the cells now are "read count", it represent the number of RNA fragments that align with a specific region of the genome or a particular gene. They are an approximate measure of the RNA abundance representing a gene in the sample.
+
+</div>

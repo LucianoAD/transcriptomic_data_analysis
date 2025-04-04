@@ -1,0 +1,17 @@
+project:
+  type: website
+
+publish:
+  - gh-pages
+
+website:
+  title: "GEO Transcriptomic Data Analysis"
+  navbar:
+    left:
+      - href: index.qmd
+      - text: "Sections"
+        menu:
+          - href: Searching_data/index.qmd
+            text: "Search and Download of transcriptomic data from the GEO database"
+          - href: Preprocessing_data/index.qmd
+            text: "Preprocessing GEO transcriptomic data"

@@ -1,0 +1,15 @@
+---
+title: "GEO Transcriptomic Data Analysis Menu"
+format: html
+---
+
+<div>
+
+⛏️ Sections under construction 🚧
+
+</div>
+
+## Sections
+
+-   [Searching_data](Searching_data/index.qmd)
+-   [Preprocessing_data](Preprocessing_data/index.qmd)
