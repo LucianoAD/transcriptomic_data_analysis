@@ -1,13 +1,12 @@
 ---
 title: "Preprocessing GEO transcriptomic data"
 author: "Luciano Anselmino"
+number-sections: false
 format: 
   html:
     toc: true
-    css: styles.css
     code-fold: true
     self-contained: true
-    theme: flatly 
 editor: visual
 ---
 

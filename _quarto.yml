@@ -1,17 +1,43 @@
 project:
   type: website
 
-publish:
-  - gh-pages
-
 website:
   title: "GEO Transcriptomic Data Analysis"
   navbar:
-    left:
-      - href: index.qmd
-      - text: "Sections"
-        menu:
-          - href: Searching_data/index.qmd
-            text: "Search and Download of transcriptomic data from the GEO database"
-          - href: Preprocessing_data/index.qmd
-            text: "Preprocessing GEO transcriptomic data"
+    background: primary
+  sidebar:
+    style: "docked"
+    search: true
+    contents:
+      - text: "About this WebGuide"
+        href: index.qmd
+      - text: "Search and download of transcriptomic data from GEO"
+        href: Searching_data/index.qmd
+        #contents:
+          #- Searching_data/index.qmd
+          # - Searching_data/archivo1.qmd
+          # - Searching_data/archivo2.qmd
+      - text: "Preprocessing the data"
+        href: Preprocessing_data/index.qmd
+        #contents:
+          #- Preprocessing_data/index.qmd
+          # - Preprocessing_data/archivo1.qmd
+          # - Preprocessing_data/archivo2.qmd
+
+  page-footer: "Developed by Luciano Anselmino"
+  repo-actions: [edit, issue, source]
+  # repo-url: PONÉ_ACÁ_TU_REPO
+
+format:
+  html:
+    theme:
+      light: minty
+      dark: darkly
+    code-link: true
+    fig-align: center
+    fig-dpi: 300
+    css: custom.css
+
+lang: en
+publish:
+  - gh-pages

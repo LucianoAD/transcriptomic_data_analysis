@@ -1,0 +1,37 @@
+body {
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+.quarto-sidebar nav a.active {
+  font-weight: bold;
+  color: #007acc;
+}
+
+main.content {
+  text-align: justify;
+}
+
+/* Estilo para el código en línea (`así`) */
+code {
+  background-color: #f4f4f4; /* fondo suave */
+  color: #c7254e;            /* color del texto */
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 0.95em;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+}
+
+div.sidebar-item-container .active {
+  font-weight: bold;
+  background-color: #eaecee;
+  border-radius: 4px;
+  margin: 2% 0 2% 0;
+  padding: 3%;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+}
+
+.sidebar nav[role=doc-toc] ul>li>a.active, .sidebar nav[role=doc-toc] ul>li>ul>li>a.active{
+  font-weight: bold;
+}

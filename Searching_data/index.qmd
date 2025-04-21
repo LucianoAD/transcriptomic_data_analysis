@@ -1,13 +1,12 @@
 ---
-title: "Search and Download of transcriptomic data from the GEO database"
+title: "Search and download of transcriptomic data from the GEO database"
 author: "Luciano Anselmino"
+number-sections: false
 format: 
   html:
     toc: true
-    css: styles.css
     code-fold: true
     self-contained: true
-    theme: flatly 
 editor: visual
 ---
 
@@ -49,7 +48,7 @@ GEO stores various types of biological data, including:
 8.  **Chromatin accessibility profiles**: Data from assays like DNase-seq or ATAC-seq, revealing accessible regions of the genome.
 :::
 
-Aca agregar como se guarda la informacion en GEO (PL GSE y GSM)
+### **How Data is Stored in GEO (Under Construction 🚧)**
 
 ### About GEOquery
 
@@ -139,7 +138,7 @@ In the image above, you can observe a schematic representation of how an object 
 
 The information in the expression matrix will depend on the technique used to obtain the gene expression values. The two most common technologies today are microarrays (chips) and RNA sequencing (RNA-seq or high-throughput platforms).
 
-When you execute 'expression_data \<- exprs(gse_data)', you save a matrix object with the name "expression_data".
+When you execute `expression_data <- exprs(gse_data)`, you save a matrix object with the name "expression"
 
 In the case of microarrays, this object has the following characteristics:
 

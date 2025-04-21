@@ -1,2 +1,19 @@
 .Rhistory
+.RData
 .Rproj.user/
+.Ruserdata
+*.Rproj
+
+# Archivos temporales de sistemas operativos
+.DS_Store
+Thumbs.db
+
+# Carpeta de outputs si generás reportes o figuras
+/output/
+
+*_cache/
+*.html
+*.nb.html
+
+/.quarto/
+/_book/

@@ -1,15 +1,18 @@
 ---
-title: "GEO Transcriptomic Data Analysis Menu"
-format: html
+title: "Welcome"
+number-sections: false
+format: 
+  html:
+    toc: true
+    code-fold: true
+    self-contained: true
+editor: visual
 ---
 
-<div>
+------------------------------------------------------------------------
 
-⛏️ Sections under construction 🚧
+This WebGuide provides an overview of the code and workflow used for transcriptomic data analysis in the publication: "Overcoming Therapy Resistance in Colorectal Cancer: Targeting the Rac1 Signaling Pathway as a Potential Therapeutic Approach"
 
-</div>
+🔗 You can access the full publication [here](https://www.mdpi.com/2073-4409/13/21/1776)
 
-## Sections
-
--   [Searching_data](Searching_data/index.qmd)
--   [Preprocessing_data](Preprocessing_data/index.qmd)
+⚠️ Note: Some sections are still under construction (🚧). Updates will be added soon!
